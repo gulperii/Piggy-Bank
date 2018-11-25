@@ -14,10 +14,8 @@ void split(const string &str, Container &cont) {
 }
 
 
-void strongConnect(vector<Node> &piggyBanks, Node &node, int index, stack<int> &stack, ofstream &myfile,
-                   vector<vector<Node>> &sccs, vector<vector<int>> &sccsWithIdentities) {
+void strongConnect(vector<Node> &piggyBanks, Node &node, int index, stack<int> &stack, vector<vector<Node>> &sccs) {
     vector<Node> sccItem;
-    vector<int> sccWithIdentities;
     node.index = index;
     node.lowlink = index;
     index++;
@@ -25,10 +23,10 @@ void strongConnect(vector<Node> &piggyBanks, Node &node, int index, stack<int> &
     node.onStack = true;
     int numKeys = node.keysInIt.size();
     for (int b = 0; b < numKeys; b++) {
-        int indexOfSucessor = node.keysInIt.at(b).identity;
+        int indexOfSucessor = node.keysInIt.at(b);
         Node &successor = piggyBanks.at(indexOfSucessor - 1);
         if (successor.index == -1) {
-            strongConnect(piggyBanks, successor, index, stack, myfile, sccs, sccsWithIdentities);
+            strongConnect(piggyBanks, successor, index, stack, sccs);
             node.lowlink = min(node.lowlink, successor.lowlink);
         } else if (successor.onStack) {
             node.lowlink = min(node.lowlink, successor.index);
@@ -42,7 +40,6 @@ void strongConnect(vector<Node> &piggyBanks, Node &node, int index, stack<int> &
             Node &item = piggyBanks.at(identityOfSucessor - 1);
             item.sccIndex = sccs.size();
             item.onStack = false;
-            sccWithIdentities.push_back(item.identity);
             sccItem.push_back(item);
         }
         if (!stack.empty()) {
@@ -51,7 +48,6 @@ void strongConnect(vector<Node> &piggyBanks, Node &node, int index, stack<int> &
             Node &item = piggyBanks.at(identityOfSucessor - 1);
             item.onStack = false;
             item.sccIndex = sccs.size();
-            sccWithIdentities.push_back(item.identity);
             sccItem.push_back(item);
         }
         sccs.push_back(sccItem);
@@ -65,12 +61,14 @@ void tarjan(vector<Node> &piggyBanks, ofstream &myfile, vector<vector<Node>> &sc
     for (int a = 0; a < piggyBanks.size(); a++) {
         Node &node = piggyBanks.at(a);
         if (node.index == -1)
-            strongConnect(piggyBanks, node, a, stack, myfile, sccs, sccsWithIdentities);
+            strongConnect(piggyBanks, node, a, stack, sccs);
     }
 }
 
 
 int main(int argc, char *argv[]) {
+
+    ios_base::sync_with_stdio(false);
     vector<vector<Node>> sccs;
     vector<vector<int>> sccsWithIdentities;
     ifstream infile(argv[1]);
@@ -87,39 +85,41 @@ int main(int argc, char *argv[]) {
         int numKeys = stoi(words[0]);
         Node node(i + 1);
         for (int a = 1; a < numKeys + 1; a++) {
-            node.keysInIt.push_back(Node(stoi(words[a])));
+            node.keysInIt.push_back(stoi(words[a]));
         }
         piggyBanks.push_back(node);
     }
 
     ofstream myfile;
     myfile.open(argv[2]);
+
     vector<int> indegreeZero;
     tarjan(piggyBanks, myfile, sccs, sccsWithIdentities);
     for (int a = 0; a < sccs.size(); a++) {
         for (int b = 0; b < sccs.at(a).size(); b++) {
-            for (Node node : sccs.at(a).at(b).keysInIt) {
-                if (piggyBanks.at(node.identity - 1).sccIndex != sccs.at(a).at(b).sccIndex) {
-                    piggyBanks.at(node.identity - 1).indegree++;
+            for (int nodeIdentity : sccs.at(a).at(b).keysInIt) {
+                if (piggyBanks.at(nodeIdentity - 1).sccIndex != sccs.at(a).at(b).sccIndex) {
+                    piggyBanks.at(nodeIdentity - 1).indegree++;
                 }
             }
         }
     }
 
     for (int a = 0; a < sccs.size(); a++) {
-        bool zero=true;
+        bool zero = true;
         for (int b = 0; b < sccs.at(a).size(); b++) {
-            if (piggyBanks.at(sccs.at(a).at(b).identity-1).indegree!= 0){
-                zero=false;
+            if (piggyBanks.at(sccs.at(a).at(b).identity - 1).indegree != 0) {
+                zero = false;
                 break;
 
             }
         }
-        if(zero)
-        indegreeZero.push_back(sccs.at(a).at(0).identity);
+        if (zero)
+            indegreeZero.push_back(sccs.at(a).at(0).identity);
     }
-    myfile<<indegreeZero.size()<<" ";
-    for(int a =0;a<indegreeZero.size();a++){
-        myfile<<indegreeZero.at(a)<<" ";
+    myfile << indegreeZero.size() << " ";
+    for (int a = 0; a < indegreeZero.size(); a++) {
+        myfile << indegreeZero.at(a) << " ";
     }
+
 }

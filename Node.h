@@ -12,7 +12,7 @@ public:
     int identity;
     int sccIndex;
     int indegree;
-    std::vector<Node> keysInIt;
+    std::vector<int> keysInIt;
     Node(int identity);
     Node(const Node& node);
     Node& operator=(const Node& node);
