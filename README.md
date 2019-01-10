@@ -1,2 +1,1 @@
-# CMPE250-Fall-2018-Project3
-project3
+A man who strongly believes in conspiracy theories doesnt trust banks and keeps all his money in piggy banks. As expected he also doesnt trust his roommate and stores the keys to the piggybanks in the piggybanks. One day he decides to use all his money for a investment. Our goal is to find the minimum number of piggybanks to broke, for obtaining keys to each of the piggybanks.
